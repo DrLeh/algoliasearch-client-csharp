@@ -56,19 +56,19 @@ namespace Algolia.Search.Test.EndToEnd.Client
             apiKeyToSend.Value = _apiKey;
             addKeyResponse.Wait();
 
-            var addedKey = await BaseTest.SearchClient.GetApiKeyAsync(_apiKey);
+            var addedKey = BaseTest.SearchClient.GetApiKey(_apiKey);
 
             Assert.IsTrue(TestHelper.AreObjectsEqual(apiKeyToSend, addedKey, "CreatedAt", "Validity",
                 "GetApiKeyDelegate", "Key"));
 
-            ListApiKeysResponse allKeys = await BaseTest.SearchClient.ListApiKeysAsync();
+            ListApiKeysResponse allKeys = BaseTest.SearchClient.ListApiKeys();
             Assert.IsTrue(allKeys.Keys.Exists(x => x.Value.Equals(_apiKey)));
 
             apiKeyToSend.MaxHitsPerQuery = 42;
             var updateKey = await BaseTest.SearchClient.UpdateApiKeyAsync(apiKeyToSend);
             updateKey.Wait();
 
-            var getUpdatedKey = await BaseTest.SearchClient.GetApiKeyAsync(_apiKey);
+            var getUpdatedKey = BaseTest.SearchClient.GetApiKey(_apiKey);
 
             Assert.That(getUpdatedKey.MaxHitsPerQuery, Is.EqualTo(42));
 
@@ -86,7 +86,7 @@ namespace Algolia.Search.Test.EndToEnd.Client
                 }
                 catch (AlgoliaApiException e)
                 {
-                    shouldRetry = e.HttpErrorCode == 404 || e.Message.Contains("Key already exists");
+                    shouldRetry = e.HttpErrorCode == 404 && e.Message.Contains("Key already exists");
                 }
                 return shouldRetry;
             }, TimeSpan.FromSeconds(1), 10);
